@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import CompanyCards from "../components/CompanyCards";
 import { Plus, Search, Upload, Download } from "lucide-react";
 import api, { errorMessage } from "../services/api";
@@ -39,6 +39,8 @@ export default function Records({
   view = "table",
   onChanged,
 }) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const followUp = searchParams.get("follow_up") || "";
   const [rows, setRows] = useState([]),
     [companies, setCompanies] = useState([]),
     [contacts, setContacts] = useState([]),
@@ -78,6 +80,7 @@ export default function Records({
               direction,
               type: contactType,
               company_id: companyId,
+              follow_up: type === "companies" ? followUp : undefined,
             },
           }),
           api.get("/companies"),
@@ -115,6 +118,7 @@ export default function Records({
     contactType,
     companyId,
     version,
+    followUp,
   ]);
   function saved() {
     onChanged?.();
@@ -247,6 +251,21 @@ export default function Records({
                   .map((c) => (
                     <option key={c}>{c}</option>
                   ))}
+              </select>
+              <select
+                aria-label="Follow-up email"
+                value={followUp}
+                onChange={(e) => {
+                  const params = new URLSearchParams(searchParams);
+                  if (e.target.value) params.set("follow_up", e.target.value);
+                  else params.delete("follow_up");
+                  setSearchParams(params);
+                }}
+              >
+                <option value="">All follow-up states</option>
+                <option value="needed">Needs follow-up email</option>
+                <option value="sent">Follow-up email sent</option>
+                <option value="not_needed">No follow-up needed</option>
               </select>
               <select
                 aria-label="Response"

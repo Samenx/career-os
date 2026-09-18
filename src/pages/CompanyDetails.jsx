@@ -186,7 +186,7 @@ export default function CompanyDetails() {
                 </dd>
               </div>
               <div>
-                <dt>Follow up sent</dt>
+                <dt>Follow-up email sent</dt>
                 <dd>{company.follow_up_sent ? "Yes" : "No"}</dd>
               </div>
               <div>

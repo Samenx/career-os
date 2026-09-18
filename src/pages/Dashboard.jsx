@@ -25,7 +25,7 @@ const cards = [
   ["Total companies", "totalCompanies", Building2, "green"],
   ["Applied", "applied", Send, "blue"],
   ["Not applied", "notApplied", BriefcaseBusiness, "gray"],
-  ["Follow ups needed", "pendingFollowUps", Clock, "orange"],
+  ["Follow-up emails needed", "companiesNeedingFollowUp", Clock, "orange"],
   ["Responses received", "responsesReceived", MessageSquare, "purple"],
   ["Interviews", "interviews", CalendarDays, "orange"],
   ["Rejected", "rejected", XCircle, "red"],
@@ -103,6 +103,11 @@ export default function Dashboard() {
             </span>
             <span className="stat-label">{label}</span>
             <strong>{data ? data[key] : "—"}</strong>
+            {key === "companiesNeedingFollowUp" && (
+              <Link to="/companies?follow_up=needed">
+                View companies <ArrowUpRight size={14} />
+              </Link>
+            )}
           </div>
         ))}
       </div>
@@ -209,7 +214,9 @@ export default function Dashboard() {
       </div>
       <p className="dashboard-footnote">
         Each outcome counts companies with a matching application or company
-        status. Follow ups needed counts pending follow-up records.
+        status. Follow-up emails needed counts each applied company once until
+        you check “Follow-up email sent” in Edit company or complete a follow-up.
+        No scheduled follow-up date is required.
       </p>
     </>
   );

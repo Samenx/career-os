@@ -54,7 +54,7 @@ export const fields = {
     f("application_date", "Application date", "date"),
     f("applied_through_linkedin", "Applied through LinkedIn", "checkbox"),
     f("response", "Response", "select", responses),
-    f("follow_up_sent", "Follow up sent", "checkbox"),
+    f("follow_up_sent", "Follow-up email sent", "checkbox"),
     f("follow_up_date", "Follow up date", "date"),
     f("notes", "Notes", "textarea"),
   ],
