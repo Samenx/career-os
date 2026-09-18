@@ -37,6 +37,7 @@ export default function Records({
   companyId,
   embedded = false,
   view = "table",
+  onChanged,
 }) {
   const [rows, setRows] = useState([]),
     [companies, setCompanies] = useState([]),
@@ -116,6 +117,7 @@ export default function Records({
     version,
   ]);
   function saved() {
+    onChanged?.();
     setEditing(null);
     setSuccess(
       `${singular[0].toUpperCase() + singular.slice(1)} ${editing?.id ? "updated" : "added"} successfully.`,
@@ -131,6 +133,7 @@ export default function Records({
       return;
     try {
       await api.delete(`/${type}/${row.id}`);
+      onChanged?.();
       setSuccess(
         `${singular[0].toUpperCase() + singular.slice(1)} deleted successfully.`,
       );

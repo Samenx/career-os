@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Pencil, Trash2, Check } from "lucide-react";
 import { Badge, date, External, Empty, today } from "./UI";
+import LinkedInStatus from "./LinkedInStatus";
 const companyLink = (row) => (
   <Link
     className="company-link"
@@ -41,6 +42,7 @@ const columns = {
       (r) => <Badge>{r.latest_status || r.application_status}</Badge>,
     ],
     ["Response", (r) => <Badge>{r.response}</Badge>],
+    ["LinkedIn application", (r) => <LinkedInStatus checked={r.applied_through_linkedin} />],
     ["CEO / Founder", (r) => contactNames(r, "CEO / Founder")],
     ["HR / Recruiter", (r) => contactNames(r, "HR / Recruiter")],
     ["Technical Lead", (r) => contactNames(r, "Technical Lead")],
@@ -50,6 +52,7 @@ const columns = {
     ["Position", (r) => r.position || "—"],
     ["Application date", (r) => date(r.application_date)],
     ["Method", (r) => r.application_method || "—"],
+    ["Applied through LinkedIn", (r) => r.applied_through_linkedin ? "Yes" : "No"],
     ["Status", (r) => <Badge>{r.status}</Badge>],
     ["Response", (r) => <Badge>{r.response}</Badge>],
     ["Follow up date", (r) => date(r.follow_up_date)],

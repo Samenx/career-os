@@ -52,6 +52,7 @@ export const fields = {
     f("location", "Location"),
     f("application_status", "Application status", "select", companyStatuses),
     f("application_date", "Application date", "date"),
+    f("applied_through_linkedin", "Applied through LinkedIn", "checkbox"),
     f("response", "Response", "select", responses),
     f("follow_up_sent", "Follow up sent", "checkbox"),
     f("follow_up_date", "Follow up date", "date"),
@@ -78,6 +79,7 @@ export const fields = {
       "Referral",
       "Other",
     ]),
+    f("applied_through_linkedin", "Applied through LinkedIn", "checkbox"),
     f("status", "Status", "select", applicationStatuses),
     f("response", "Response", "select", responses),
     f("follow_up_date", "Follow up date", "date"),
@@ -94,6 +96,7 @@ export const fields = {
 };
 const defaults = {
   companies: {
+    applied_through_linkedin: false,
     application_status: "Not Applied",
     response: "No Response",
     follow_up_sent: false,
@@ -102,6 +105,7 @@ const defaults = {
   applications: {
     status: "Applied",
     application_method: "",
+    applied_through_linkedin: false,
     response: "No Response",
   },
   "follow-ups": { status: "Pending" },

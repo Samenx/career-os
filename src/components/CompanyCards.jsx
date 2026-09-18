@@ -8,6 +8,7 @@ import {
   Mail,
 } from "lucide-react";
 import { Badge, External, Empty, date } from "./UI";
+import LinkedInStatus from "./LinkedInStatus";
 export default function CompanyCards({ rows, onEdit, onDelete }) {
   if (!rows.length)
     return (
@@ -51,6 +52,7 @@ export default function CompanyCards({ rows, onEdit, onDelete }) {
             <Badge>{company.response}</Badge>
           </div>
           <div className="company-card-meta">
+            <LinkedInStatus checked={company.applied_through_linkedin} />
             {company.location && (
               <span>
                 <MapPin size={14} />

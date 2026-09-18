@@ -1417,7 +1417,7 @@ dialog::backdrop {
   color: var(--muted);
   overflow-wrap: anywhere;
 }
-.company-card-meta :is(span, a) {
+.company-card-meta > :is(span, a) {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -1627,4 +1627,68 @@ dialog::backdrop {
   .company-card-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.linkedin-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 100%;
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #f3f6f4;
+  color: #53655b;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 500;
+}
+.linkedin-status svg {
+  flex-shrink: 0;
+}
+.linkedin-status-label {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: normal;
+}
+.linkedin-status-value {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: #e4ebe6;
+  color: #43564a;
+  font-size: 11px;
+  font-weight: 700;
+}
+.linkedin-status.is-checked {
+  background: #edf7f1;
+  border-color: #c5e1d1;
+  color: #176b52;
+}
+.linkedin-status.is-checked .linkedin-status-value {
+  background: #d2ebdd;
+  color: #14533f;
+}
+.company-header .linkedin-status {
+  margin-top: 12px;
+}
+[data-theme="dark"] .linkedin-status {
+  background: #202e26;
+  border-color: var(--border);
+  color: #b3c5b9;
+}
+[data-theme="dark"] .linkedin-status-value {
+  background: #33453a;
+  color: #d1dfd5;
+}
+[data-theme="dark"] .linkedin-status.is-checked {
+  background: #19382b;
+  border-color: #35624c;
+  color: #99dbb6;
+}
+[data-theme="dark"] .linkedin-status.is-checked .linkedin-status-value {
+  background: #2a513b;
+  color: #b9efd0;
 }

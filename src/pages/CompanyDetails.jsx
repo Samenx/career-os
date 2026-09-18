@@ -5,6 +5,7 @@ import api, { errorMessage } from "../services/api";
 import { Badge, date, External, Modal, Notice, Empty } from "../components/UI";
 import RecordForm from "../components/RecordForm";
 import Records from "./Records";
+import LinkedInStatus from "../components/LinkedInStatus";
 export default function CompanyDetails() {
   const { id } = useParams();
   const [company, setCompany] = useState(null),
@@ -94,6 +95,7 @@ export default function CompanyDetails() {
             <External href={company.website}>Visit Website</External>
             <External href={company.linkedin_url}>View LinkedIn</External>
           </div>
+          <LinkedInStatus checked={company.applied_through_linkedin} />
         </div>
         <button className="button secondary" onClick={() => setEditing(true)}>
           <Pencil size={15} />
@@ -193,7 +195,7 @@ export default function CompanyDetails() {
               </div>
             </dl>
           </section>
-          <Records type="applications" companyId={id} embedded />
+          <Records type="applications" companyId={id} embedded onChanged={() => setVersion((v) => v + 1)} />
           <Records type="follow-ups" companyId={id} embedded />
         </>
       )}
