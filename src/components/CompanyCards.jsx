@@ -1,3 +1,4 @@
+import { trackingStatus } from "../services/tracking";
 import { Link } from "react-router-dom";
 import {
   MapPin,
@@ -48,10 +49,10 @@ export default function CompanyCards({ rows, onEdit, onDelete }) {
               "No description yet. Add what you know about this company."}
           </p>
           <div className="company-card-badges">
-            <Badge>{company.latest_status || company.application_status}</Badge>
-            <Badge>{company.response}</Badge>
+            <Badge>{trackingStatus(company, true)}</Badge>
           </div>
           <div className="company-card-meta">
+            {company.has_follow_up_sent && <Link to={`/companies/${company.id}?tab=Follow+ups`}>Follow-up sent</Link>}
             <LinkedInStatus checked={company.applied_through_linkedin} />
             {company.location && (
               <span>

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Notice } from "./UI";
 import api, { errorMessage } from "../services/api";
+import { trackingStatus, statusFields } from "../services/tracking";
 export const companyStatuses = [
   "Not Applied",
   "Applied",
+  "Responded",
   "Interview",
   "Accepted",
   "Rejected",
@@ -24,6 +26,7 @@ export const contactTypes = [
 ];
 export const applicationStatuses = [
   "Applied",
+  "Responded",
   "Under Review",
   "Interview",
   "Technical Interview",
@@ -53,7 +56,6 @@ export const fields = {
     f("application_status", "Application status", "select", companyStatuses),
     f("application_date", "Application date", "date"),
     f("applied_through_linkedin", "Applied through LinkedIn", "checkbox"),
-    f("response", "Response", "select", responses),
     f("follow_up_sent", "Follow-up email sent", "checkbox"),
     f("follow_up_date", "Follow up date", "date"),
     f("notes", "Notes", "textarea"),
@@ -81,7 +83,6 @@ export const fields = {
     ]),
     f("applied_through_linkedin", "Applied through LinkedIn", "checkbox"),
     f("status", "Status", "select", applicationStatuses),
-    f("response", "Response", "select", responses),
     f("follow_up_date", "Follow up date", "date"),
     f("notes", "Notes", "textarea"),
   ],
@@ -123,6 +124,7 @@ export default function RecordForm({
   const [values, setValues] = useState({
     ...defaults[type],
     ...record,
+    ...(["companies", "applications"].includes(type) ? { [type === "companies" ? "application_status" : "status"]: trackingStatus(record ? { ...record, latest_status: null, latest_response: null } : defaults[type], type === "companies") } : {}),
     ...(companyId ? { company_id: companyId } : {}),
   });
   const [error, setError] = useState(""),
@@ -142,6 +144,18 @@ export default function RecordForm({
       const body = Object.fromEntries(
         fields[type].map((field) => [field.name, values[field.name] ?? ""]),
       );
+      if (["companies", "applications"].includes(type)) {
+        const statusKey = type === "companies" ? "application_status" : "status";
+        const initialStatus = trackingStatus(record ? { ...record, latest_status: null, latest_response: null } : defaults[type], type === "companies");
+        if (record?.id && values[statusKey] === initialStatus) {
+          body[statusKey] = record[statusKey];
+        } else Object.assign(body, statusFields(values[statusKey], type === "companies"));
+      }
+      if (type === "companies" && record?.application_count > 0) {
+        delete body.application_status;
+        delete body.application_date;
+        delete body.response;
+      }
       if (record?.id) await api.put(`/${type}/${record.id}`, body);
       else await api.post("/" + type, body);
       onSaved();
@@ -158,8 +172,9 @@ export default function RecordForm({
         <p className="form-help span-two">
           Fill in only what you know. Fields marked * are required; everything
           else can stay blank.
+          {type === "companies" && record?.application_count > 0 && " Update application status and dates in the company’s Application tab."}
         </p>
-        {fields[type].map((field) => {
+        {fields[type].filter((field) => !(type === "companies" && record?.application_count > 0 && ["application_status", "application_date"].includes(field.name))).map((field) => {
           const { name, label, type: inputType } = field;
           const value = values[name] ?? "";
           let options = field.options?.map((v) => ({ id: v, name: v }));

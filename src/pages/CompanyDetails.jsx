@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Pencil, Plus, Trash2 } from "lucide-react";
 import api, { errorMessage } from "../services/api";
 import { Badge, date, External, Modal, Notice, Empty } from "../components/UI";
 import RecordForm from "../components/RecordForm";
+import { trackingStatus } from "../services/tracking";
 import Records from "./Records";
 import LinkedInStatus from "../components/LinkedInStatus";
 export default function CompanyDetails() {
   const { id } = useParams();
+  const [params, setParams] = useSearchParams();
+  const tab = params.get("tab") || "Overview";
+  const setTab = (value) => setParams({ tab: value });
   const [company, setCompany] = useState(null),
-    [tab, setTab] = useState("Overview"),
     [notes, setNotes] = useState([]),
     [error, setError] = useState(""),
     [success, setSuccess] = useState(""),
@@ -95,6 +98,10 @@ export default function CompanyDetails() {
             <External href={company.website}>Visit Website</External>
             <External href={company.linkedin_url}>View LinkedIn</External>
           </div>
+          <Badge>{trackingStatus(company, true)}</Badge>
+          <Link className="back-link" to={`?tab=Follow+ups`}>
+            {company.has_follow_up_sent ? "Follow-up sent" : "Follow-up tracking"}
+          </Link>
           <LinkedInStatus checked={company.applied_through_linkedin} />
         </div>
         <button className="button secondary" onClick={() => setEditing(true)}>
@@ -104,7 +111,7 @@ export default function CompanyDetails() {
       </div>
       <Notice error={error} success={success} />
       <div className="tabs">
-        {["Overview", "Application", "Contacts", "Notes"].map((t) => (
+        {["Overview", "Application", "Follow ups", "Contacts", "Notes"].map((t) => (
           <button
             className={tab === t ? "active" : ""}
             key={t}
@@ -119,9 +126,6 @@ export default function CompanyDetails() {
           <h2>Company overview</h2>
           <dl className="detail-grid">
             {[
-              ["Company name", company.name],
-              ["Category", company.category],
-              ["Description", company.description],
               ["Location", company.location],
               ["General email", company.general_email],
               ["Careers email", company.careers_email],
@@ -132,18 +136,6 @@ export default function CompanyDetails() {
                 <dd>{value || "—"}</dd>
               </div>
             ))}
-            <div>
-              <dt>Website</dt>
-              <dd>
-                <External href={company.website}>Visit Website</External>
-              </dd>
-            </div>
-            <div>
-              <dt>LinkedIn</dt>
-              <dd>
-                <External href={company.linkedin_url}>View LinkedIn</External>
-              </dd>
-            </div>
             <div>
               <dt>Directory profile</dt>
               <dd>
@@ -157,46 +149,43 @@ export default function CompanyDetails() {
       )}
       {tab === "Application" && (
         <>
-          <section className="panel detail-panel">
+          {!company.application_count && <section className="panel detail-panel">
             <div className="section-heading">
-              <h2>Company-level tracking</h2>
+              <h2>Application tracking</h2>
               <button className="text-button" onClick={() => setEditing(true)}>
                 Edit tracking
               </button>
             </div>
             <p className="muted">
-              General tracking from your company record. Individual positions
-              are tracked below.
+              Track your application here, or add individual positions below.
             </p>
             <dl className="detail-grid">
               <div>
                 <dt>Status</dt>
                 <dd>
-                  <Badge>{company.application_status}</Badge>
+                  <Badge>{trackingStatus(company, true)}</Badge>
                 </dd>
               </div>
               <div>
                 <dt>Application date</dt>
                 <dd>{date(company.application_date)}</dd>
               </div>
-              <div>
-                <dt>Response</dt>
-                <dd>
-                  <Badge>{company.response}</Badge>
-                </dd>
-              </div>
-              <div>
-                <dt>Follow-up email sent</dt>
-                <dd>{company.follow_up_sent ? "Yes" : "No"}</dd>
-              </div>
-              <div>
-                <dt>Follow up date</dt>
-                <dd>{date(company.follow_up_date)}</dd>
-              </div>
             </dl>
-          </section>
+          </section>}
           <Records type="applications" companyId={id} embedded onChanged={() => setVersion((v) => v + 1)} />
-          <Records type="follow-ups" companyId={id} embedded />
+        </>
+      )}
+      {tab === "Follow ups" && (
+        <>
+          <section className="panel detail-panel">
+            <h2>Follow-up summary</h2>
+            <p>{company.has_follow_up_sent ? "Follow-up sent" : "No follow-up recorded as sent"}</p>
+            {company.follow_up_sent && <p className="muted">Marked as sent in the company record. A send date was not recorded.</p>}
+            {company.follow_up_date && <p>Company reminder: {date(company.follow_up_date)}</p>}
+            {company.application_follow_up_date && <p>Application reminder: {date(company.application_follow_up_date)}</p>}
+            <button className="text-button" onClick={() => setEditing(true)}>Edit follow-up tracking</button>
+          </section>
+          <Records type="follow-ups" companyId={id} embedded onChanged={() => setVersion((v) => v + 1)} />
         </>
       )}
       {tab === "Contacts" && (

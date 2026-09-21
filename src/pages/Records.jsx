@@ -40,15 +40,23 @@ export default function Records({
   onChanged,
 }) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [embeddedStatus, setEmbeddedStatus] = useState("");
+  const status = embedded ? embeddedStatus : searchParams.get("status") || "";
+  const response = embedded ? "" : searchParams.get("response") || "";
+  function setStatus(value) {
+    if (embedded) { setEmbeddedStatus(value); return; }
+    const params = new URLSearchParams(searchParams);
+    if (value) params.set("status", value); else params.delete("status");
+    params.delete("response");
+    setSearchParams(params);
+  }
   const followUp = searchParams.get("follow_up") || "";
   const [rows, setRows] = useState([]),
     [companies, setCompanies] = useState([]),
     [contacts, setContacts] = useState([]),
     [applications, setApplications] = useState([]);
   const [search, setSearch] = useState(""),
-    [status, setStatus] = useState(""),
     [category, setCategory] = useState(""),
-    [response, setResponse] = useState(""),
     [sort, setSort] = useState("name"),
     [direction, setDirection] = useState("asc"),
     [contactType, setContactType] = useState("");
@@ -149,6 +157,7 @@ export default function Records({
   async function complete(row) {
     try {
       await api.patch(`/follow-ups/${row.id}/complete`);
+      onChanged?.();
       setSuccess("Follow up completed.");
       setVersion((v) => v + 1);
     } catch (err) {
@@ -211,18 +220,19 @@ export default function Records({
       )}
       {type === "companies" && (
         <div className="view-tabs" aria-label="Company view">
-          <Link className={view === "table" ? "active" : ""} to="/companies">
+          <Link className={view === "table" ? "active" : ""} to={"/companies?" + searchParams.toString()}>
             Table view
           </Link>
           <Link
             className={view === "cards" ? "active" : ""}
-            to="/company-cards"
+            to={"/company-cards?" + searchParams.toString()}
           >
             Card view
           </Link>
         </div>
       )}
       <Notice error={error} success={success} />
+      {response && !embedded && <p className="muted">Showing companies with a response. <button className="text-button" onClick={() => { const params = new URLSearchParams(searchParams); params.delete("response"); setSearchParams(params); }}>Clear filter</button></p>}
       <section className="panel">
         <div className="toolbar">
           <label className="search">
@@ -266,15 +276,6 @@ export default function Records({
                 <option value="needed">Needs follow-up email</option>
                 <option value="sent">Follow-up email sent</option>
                 <option value="not_needed">No follow-up needed</option>
-              </select>
-              <select
-                aria-label="Response"
-                value={response}
-                onChange={(e) => setResponse(e.target.value)}
-              >
-                <option value="">All responses</option>
-                <option>Responded</option>
-                <option>No Response</option>
               </select>
               <select
                 aria-label="Sort by"
@@ -332,6 +333,7 @@ export default function Records({
           <CompanyCards rows={rows} onEdit={setEditing} onDelete={remove} />
         ) : (
           <RecordTable
+            embedded={embedded}
             type={type}
             rows={rows}
             onEdit={setEditing}

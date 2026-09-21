@@ -1,3 +1,4 @@
+import { trackingStatus } from "../services/tracking";
 import { Link } from "react-router-dom";
 import { Pencil, Trash2, Check } from "lucide-react";
 import { Badge, date, External, Empty, today } from "./UI";
@@ -39,9 +40,9 @@ const columns = {
     ],
     [
       "Application status",
-      (r) => <Badge>{r.latest_status || r.application_status}</Badge>,
+      (r) => <Badge>{trackingStatus(r, true)}</Badge>,
     ],
-    ["Response", (r) => <Badge>{r.response}</Badge>],
+    ["Follow-up", (r) => <Link to={`/companies/${r.id}?tab=Follow+ups`}>{r.has_follow_up_sent ? "Sent" : "View follow-ups"}</Link>],
     ["LinkedIn application", (r) => <LinkedInStatus checked={r.applied_through_linkedin} />],
     ["CEO / Founder", (r) => contactNames(r, "CEO / Founder")],
     ["HR / Recruiter", (r) => contactNames(r, "HR / Recruiter")],
@@ -51,10 +52,8 @@ const columns = {
     ["Company", companyLink],
     ["Position", (r) => r.position || "—"],
     ["Application date", (r) => date(r.application_date)],
-    ["Method", (r) => r.application_method || "—"],
-    ["Applied through LinkedIn", (r) => r.applied_through_linkedin ? "Yes" : "No"],
-    ["Status", (r) => <Badge>{r.status}</Badge>],
-    ["Response", (r) => <Badge>{r.response}</Badge>],
+    ["Method", (r) => r.applied_through_linkedin ? (r.application_method && r.application_method !== "LinkedIn" ? `${r.application_method} · LinkedIn` : "LinkedIn") : r.application_method || "—"],
+    ["Status", (r) => <Badge>{trackingStatus(r)}</Badge>],
     ["Follow up date", (r) => date(r.follow_up_date)],
   ],
   contacts: [
@@ -87,7 +86,7 @@ const columns = {
         </>
       ),
     ],
-    ["Status", (r) => <Badge>{r.status}</Badge>],
+    ["Status", (r) => <Badge>{trackingStatus(r)}</Badge>],
     [
       "Notes",
       (r) => (
@@ -104,14 +103,16 @@ export default function RecordTable({
   onEdit,
   onDelete,
   onComplete,
+  embedded = false,
 }) {
   if (!rows.length) return <Empty />;
+  const visibleColumns = columns[type].filter(([label]) => !embedded || label !== "Company");
   return (
     <div className="table-scroll">
       <table>
         <thead>
           <tr>
-            {columns[type].map(([label]) => (
+            {visibleColumns.map(([label]) => (
               <th key={label}>{label}</th>
             ))}
             <th>Actions</th>
@@ -129,7 +130,7 @@ export default function RecordTable({
                   : ""
               }
             >
-              {columns[type].map(([label, render]) => (
+              {visibleColumns.map(([label, render]) => (
                 <td key={label}>{render(row)}</td>
               ))}
               <td>

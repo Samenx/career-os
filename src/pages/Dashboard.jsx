@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { trackingStatus } from "../services/tracking";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Building2,
   Send,
@@ -22,16 +23,18 @@ import {
   today,
 } from "../components/UI";
 const cards = [
-  ["Total companies", "totalCompanies", Building2, "green"],
-  ["Applied", "applied", Send, "blue"],
-  ["Not applied", "notApplied", BriefcaseBusiness, "gray"],
-  ["Follow-up emails needed", "companiesNeedingFollowUp", Clock, "orange"],
-  ["Responses received", "responsesReceived", MessageSquare, "purple"],
-  ["Interviews", "interviews", CalendarDays, "orange"],
-  ["Rejected", "rejected", XCircle, "red"],
-  ["Accepted", "accepted", CheckCircle2, "green"],
+  ["Total companies", "totalCompanies", Building2, "green", "/companies"],
+  ["Applied", "applied", Send, "blue", "/companies?status=Applied"],
+  ["Not applied", "notApplied", BriefcaseBusiness, "gray", "/companies?status=Not+Applied"],
+  ["Follow-up emails needed", "companiesNeedingFollowUp", Clock, "orange", "/companies?follow_up=needed"],
+  ["Responses received", "responsesReceived", MessageSquare, "purple", "/companies?response=Responded"],
+  ["Interviews", "interviews", CalendarDays, "orange", "/companies?status=Interview"],
+  ["Rejected", "rejected", XCircle, "red", "/companies?status=Rejected"],
+  ["Accepted", "accepted", CheckCircle2, "green", "/companies?status=Accepted"],
 ];
 export default function Dashboard() {
+  const navigate = useNavigate();
+  const rowLink = (path) => ({ tabIndex: 0, role: "link", className: "dashboard-row", onClick: () => navigate(path), onKeyDown: (e) => { if (e.target === e.currentTarget && e.key === "Enter") navigate(path); } });
   const [data, setData] = useState(null),
     [error, setError] = useState("");
   useEffect(() => {
@@ -89,26 +92,22 @@ export default function Dashboard() {
       </div>
       <div className="section-heading">
         <h2>Your search at a glance</h2>
-        <span className="muted">
+        <Link to="/applications" className="muted">
           {data
             ? `${data.totalApplications} applications tracked`
             : "Loading your overview…"}
-        </span>
+        </Link>
       </div>
       <div className="stat-grid">
-        {cards.map(([label, key, Icon, color]) => (
-          <div className="stat-card" key={key}>
+        {cards.map(([label, key, Icon, color, href]) => (
+          <Link className="stat-card" key={key} to={href}>
             <span className={"stat-icon " + color}>
               <Icon size={19} />
             </span>
             <span className="stat-label">{label}</span>
             <strong>{data ? data[key] : "—"}</strong>
-            {key === "companiesNeedingFollowUp" && (
-              <Link to="/companies?follow_up=needed">
-                View companies <ArrowUpRight size={14} />
-              </Link>
-            )}
-          </div>
+            <span>View companies <ArrowUpRight size={14} /></span>
+          </Link>
         ))}
       </div>
       <div className="dashboard-tables">
@@ -131,11 +130,11 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {data.recentApplications.map((a) => (
-                    <tr key={a.id}>
+                    <tr key={a.id} {...rowLink(`/companies/${a.company_id}?tab=Application`)}>
                       <td>
                         <Link
                           className="company-link"
-                          to={"/companies/" + a.company_id}
+                          to={"/companies/" + a.company_id + "?tab=Application"}
                         >
                           {a.company_name}
                         </Link>
@@ -143,7 +142,7 @@ export default function Dashboard() {
                       </td>
                       <td>{date(a.application_date)}</td>
                       <td>
-                        <Badge>{a.status}</Badge>
+                        <Badge>{trackingStatus(a)}</Badge>
                       </td>
                     </tr>
                   ))}
@@ -179,11 +178,11 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {data.upcomingFollowUps.map((f) => (
-                    <tr key={f.id}>
+                    <tr key={f.id} {...rowLink(`/companies/${f.company_id}?tab=Follow+ups`)}>
                       <td>
                         <Link
                           className="company-link"
-                          to={"/companies/" + f.company_id}
+                          to={"/companies/" + f.company_id + "?tab=Follow+ups"}
                         >
                           {f.company_name}
                         </Link>
